@@ -1,0 +1,66 @@
+{{define "layout"}}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TiddlyWiki{{if .Title}} - {{.Title}}{{end}}</title>
+  <style>
+    body {
+        background-color: ghostwhite;
+        color: #333;
+        font-family: Verdana, serif;
+        font-size: 18px;
+        line-height: 1.5rem;
+    }
+    button {
+        font-weight: bold;
+        padding: 0.3rem 0.6rem;
+    }
+    button, input {
+        color: inherit;
+        font-family: inherit;
+        font-size: inherit;
+    }
+    input {
+        padding: 0.3rem;
+        width: 20rem;
+    }
+    label {
+        display: inline-block;
+        margin-bottom: 0.62rem;
+        width: 6rem;
+    }
+    section {
+        margin: 1rem auto;
+        max-width: 43rem;
+    }
+  </style>
+</head>
+<body>
+<section id="login-section">
+    <form action="/login/" method="post">
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" name="email" id="email">
+        </div>
+        <div>
+            <label for="password">Password:</label>
+            <input type="password" name="password" id="password">
+        </div>
+        <button type="submit">Log In</button>
+    </form>
+</section>
+<section>
+    <pre>The more it snows (tiddlypom)
+The more it goes  (tiddlypom)
+The more it goes  (tiddlypom)
+On snowing
+
+And nobody knows  (tiddlypom)
+How cold my toes  (tiddlypom)
+How cold my toes  (tiddlypom)
+Are growing</pre>
+</section>
+</body>
+</html>
+{{end}}

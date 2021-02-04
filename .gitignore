@@ -25,5 +25,5 @@
 .vscode/
 **/database/*
 **/exp/*
-cmd/web/tiddly-pom
-cmd/web/tiddly.db
+cmd/web/tiddlypom
+cmd/web/tiddly.txt
