@@ -26,5 +26,6 @@
 **/database/*
 **/exp/*
 cmd/admin/admin
+cmd/web/deploy.sh
 cmd/web/tiddlypom
 cmd/web/tiddly.txt

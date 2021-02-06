@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -17,10 +18,16 @@ import (
 
 func main() {
 	var port int
+	var debug bool
 	flag.IntVar(&port, "port", 9090, "the port to start the web server on")
+	flag.BoolVar(&debug, "debug", false, "set to true when you need more logging info")
 	flag.Parse()
 
-	infoLog := log.New(os.Stdout, "INFO  ", log.Ldate|log.Ltime|log.Lmsgprefix)
+	infoWriter := ioutil.Discard
+	if debug {
+		infoWriter = os.Stdout
+	}
+	infoLog := log.New(infoWriter, "INFO  ", log.Ldate|log.Ltime|log.Lmsgprefix)
 	errorLog := log.New(os.Stderr, "ERROR ", log.Ldate|log.Ltime|log.Lshortfile|log.Lmsgprefix)
 
 	config, err := config.LoadConfig()
