@@ -11,15 +11,29 @@ import (
 
 func (s *server) registerRoutes() {
 	mux := http.NewServeMux()
-	addFileHandler(mux, "/favicon.ico")
+	addIcons(mux)
 	mux.Handle("/", s.authenticate(s.requireAuthentication(s.handleHome())))
 	mux.Handle("/bags/default/tiddlers/", s.authenticate(s.requireAuthentication(s.handleDelete())))
 	mux.Handle("/login/", s.handleLogin())
+	mux.Handle("/logout/", s.handleLogout())
 	mux.Handle("/recipes/default/tiddlers/", s.authenticate(s.requireAuthentication(s.handleTiddler())))
 	mux.Handle("/recipes/default/tiddlers.json", s.authenticate(s.requireAuthentication(s.handleList())))
 	mux.Handle("/status", s.authenticate(s.requireAuthentication(s.handleStatus())))
 
 	s.router = s.recoverPanicMw(logifymw.LogIt2(s.infoLog, headersMw(mux)))
+}
+
+func addIcons(mux *http.ServeMux) {
+	icons := []string{
+		"/apple-touch-icon-120x120-precomposed.png",
+		"/apple-touch-icon-120x120.png",
+		"/apple-touch-icon-precomposed.png",
+		"/apple-touch-icon.png",
+		"/favicon.ico",
+	}
+	for _, icon := range icons {
+		addFileHandler(mux, icon)
+	}
 }
 
 func addFileHandler(mux *http.ServeMux, file string) {
