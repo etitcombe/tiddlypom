@@ -122,6 +122,26 @@ func (s *server) handleLogin() http.HandlerFunc {
 	}
 }
 
+func (s *server) handleLogout() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		c, err := r.Cookie(rememberCookieName)
+		if err != nil {
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+		err = s.userStore.ClearRememberToken(c.Value)
+		if err != nil {
+			s.errorLog.Println("error clearing remember token", err)
+		}
+		c.Expires = time.Date(1970, time.January, 1, 0, 0, 0, 0, time.UTC)
+		c.MaxAge = 0
+		c.Path = "/"
+		c.Value = ""
+		http.SetCookie(w, c)
+		http.Redirect(w, r, "/", http.StatusFound)
+	}
+}
+
 func (s *server) handleStatus() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// https://tiddlywiki.com/static/WebServer%2520API%253A%2520Get%2520Server%2520Status.html
