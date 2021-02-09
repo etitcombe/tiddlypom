@@ -14,6 +14,7 @@ func (s *server) registerRoutes() {
 	addIcons(mux)
 	mux.Handle("/", s.authenticate(s.requireAuthentication(s.handleHome())))
 	mux.Handle("/bags/default/tiddlers/", s.authenticate(s.requireAuthentication(s.handleDelete())))
+	mux.Handle("/bags/bag/tiddlers/", s.authenticate(s.requireAuthentication(s.handleDelete())))
 	mux.Handle("/login/", s.handleLogin())
 	mux.Handle("/logout/", s.handleLogout())
 	mux.Handle("/recipes/default/tiddlers/", s.authenticate(s.requireAuthentication(s.handleTiddler())))

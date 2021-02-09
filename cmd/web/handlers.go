@@ -21,7 +21,15 @@ func (s *server) handleDelete() http.HandlerFunc {
 			s.clientError(w, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 			return
 		}
-		title := strings.TrimPrefix(r.URL.Path, "/bags/default/tiddlers/")
+		var title string
+		if strings.HasPrefix(r.URL.Path, "/bags/default/tiddlers/") {
+			title = strings.TrimPrefix(r.URL.Path, "/bags/default/tiddlers/")
+		} else if strings.HasPrefix(r.URL.Path, "/bags/bag/tiddlers/") {
+			title = strings.TrimPrefix(r.URL.Path, "/bags/bag/tiddlers/")
+		} else {
+			s.serverError(w, r, fmt.Errorf("invalid path: %q", r.URL.Path))
+		}
+
 		if err := s.tiddlyStore.Delete(r.Context(), title); err != nil {
 			s.serverError(w, r, err)
 			return
