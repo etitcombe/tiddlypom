@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
+	"strings"
 
 	app "github.com/etitcombe/tiddlypom"
 	_ "github.com/mattn/go-sqlite3" // sqlite
@@ -140,12 +142,8 @@ func delete(ctx context.Context, tx *sql.Tx, title string) error {
 }
 
 func get(ctx context.Context, tx *sql.Tx, title string) (app.Tiddler, error) {
-	row := tx.QueryRowContext(ctx, "SELECT rev, meta, text FROM tiddler WHERE title = ?", title)
-	if row.Err() != nil {
-		return app.Tiddler{}, row.Err()
-	}
 	var t app.Tiddler
-	err := row.Scan(&t.Rev, &t.Meta, &t.Text)
+	err := tx.QueryRowContext(ctx, "SELECT rev, meta, text FROM tiddler WHERE title = ?", title).Scan(&t.Rev, &t.Meta, &t.Text)
 	if err != nil {
 		return app.Tiddler{}, err
 	}
@@ -194,16 +192,17 @@ func upsert(ctx context.Context, tx *sql.Tx, title string, t app.Tiddler) error 
 
 // migrate sets up migration tracking and executes pending migration files.
 //
-// Migration files are embedded in the sqlite/migration folder and are executed
-// in lexigraphical order.
+// Migration files are embedded in the migration folder and are executed
+// in lexicographical order.
 //
-// Once a migration is run, its name is stored in the 'migrations' table so it
-// is not re-executed. Migrations run in a transaction to prevent partial
-// migrations.
+// Once a migration is run, its name is used to update the user_version property
+// of the database so that it is not re-executed. Migrations run in a transaction
+// to prevent partial migrations.
 func (ts *TiddlyStore) migrate() error {
-	// Ensure the 'migrations' table exists so we don't duplicate migrations.
-	if _, err := ts.db.Exec(`CREATE TABLE IF NOT EXISTS migrations (name TEXT PRIMARY KEY);`); err != nil {
-		return fmt.Errorf("cannot create migrations table: %w", err)
+	var userVersion int
+	err := ts.db.QueryRow("PRAGMA user_version;").Scan(&userVersion)
+	if err != nil {
+		return fmt.Errorf("cannot get user_version: %w", err)
 	}
 
 	names, err := filepath.Glob("migration/*.sql")
@@ -214,7 +213,7 @@ func (ts *TiddlyStore) migrate() error {
 
 	// Loop over all migration files and execute them in order.
 	for _, name := range names {
-		if err := ts.migrateFile(name); err != nil {
+		if err := ts.migrateFile(userVersion, name); err != nil {
 			return fmt.Errorf("migration error: name=%q err=%w", name, err)
 		}
 	}
@@ -222,21 +221,22 @@ func (ts *TiddlyStore) migrate() error {
 }
 
 // migrate runs a single migration file within a transaction. On success, the
-// migration file name is saved to the "migrations" table to prevent re-running.
-func (ts *TiddlyStore) migrateFile(name string) error {
+// user_version of the database file is updated to prevent re-running.
+func (ts *TiddlyStore) migrateFile(userVersion int, name string) error {
+	fileVersion, err := strconv.Atoi(strings.ReplaceAll(filepath.Base(name), filepath.Ext(name), ""))
+	if err != nil {
+		return err
+	}
+
+	if fileVersion <= userVersion {
+		return nil // already run migration, skip
+	}
+
 	tx, err := ts.db.Begin()
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
-
-	// Ensure migration has not already been run.
-	var n int
-	if err := tx.QueryRow(`SELECT COUNT(*) FROM migrations WHERE name = ?`, name).Scan(&n); err != nil {
-		return err
-	} else if n != 0 {
-		return nil // already run migration, skip
-	}
 
 	f, err := os.Open(name)
 	if err != nil {
@@ -251,9 +251,9 @@ func (ts *TiddlyStore) migrateFile(name string) error {
 		return err
 	}
 
-	// Insert record into migrations to prevent re-running migration.
-	if _, err := tx.Exec(`INSERT INTO migrations (name) VALUES (?)`, name); err != nil {
-		return err
+	// Update user_version to prevent re-running migration. Trying to parameterize the statement results in an error: 'near "?": syntax error'
+	if _, err := tx.Exec(fmt.Sprintf("PRAGMA user_version = %d;", fileVersion)); err != nil {
+		return fmt.Errorf("failed to update user_version: %w", err)
 	}
 
 	return tx.Commit()
