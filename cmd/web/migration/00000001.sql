@@ -3,7 +3,7 @@ CREATE TABLE tiddler (
 	title      TEXT NOT NULL UNIQUE,
 	rev        INTEGER NOT NULL,
 	meta       TEXT NOT NULL,
-    text       TEXT NOT NULL,
+	text       TEXT NOT NULL,
 	is_system  INTEGER NOT NULL DEFAULT (0)
 );
 
