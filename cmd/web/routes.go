@@ -67,15 +67,13 @@ func (s *server) authenticate(h http.Handler) http.Handler {
 }
 
 func headersMw(next http.Handler) http.Handler {
-	// adding these headers causes the site to render incorrectly. which one causes the problem?
 	var headers = map[string]string{
-		// "Content-Security-Policy":   "default-src 'self'; script-src 'self'; img-src 'self';",
-		// "Feature-Policy":            "camera 'none';fullscreen 'self';geolocation 'none';gyroscope 'none';magnetometer 'none';microphone 'none';midi 'none';payment 'none';sync-xhr 'none';",
-		// "Referrer-Policy":           "no-referrer-when-downgrade",
-		// "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-		// "X-Content-Type-Options":    "nosniff",
-		// "X-Frame-Options":           "SAMEORIGIN",
-		// "X-XSS-Protection":          "1; mode=block",
+		"Feature-Policy":            "camera 'none';fullscreen 'self';geolocation 'none';gyroscope 'none';magnetometer 'none';microphone 'none';midi 'none';payment 'none';sync-xhr 'none';",
+		"Referrer-Policy":           "no-referrer-when-downgrade",
+		"Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+		"X-Content-Type-Options":    "nosniff",
+		"X-Frame-Options":           "SAMEORIGIN",
+		"X-XSS-Protection":          "1; mode=block",
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		for k, v := range headers {
