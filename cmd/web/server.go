@@ -106,7 +106,7 @@ func (s *server) render(w http.ResponseWriter, r *http.Request, name, title stri
 
 	ts, ok := s.templateCache[name]
 	if !ok {
-		s.serverError(w, r, fmt.Errorf("The template %s does not exist", name))
+		s.serverError(w, r, fmt.Errorf("template %s does not exist", name))
 		return
 	}
 
@@ -129,7 +129,7 @@ func (s *server) render(w http.ResponseWriter, r *http.Request, name, title stri
 	buf.WriteTo(w)
 }
 
-func (s *server) readCache(key string) (interface{}, bool) {
+/*func (s *server) readCache(key string) (interface{}, bool) {
 	s.rwMutex.RLock()
 	defer s.rwMutex.RUnlock()
 	if value, ok := s.cache[key]; ok {
@@ -142,7 +142,7 @@ func (s *server) removeCache(key string) {
 	s.rwMutex.Lock()
 	defer s.rwMutex.Unlock()
 	delete(s.cache, key)
-}
+}*/
 
 func (s *server) setCache(key string, value interface{}) {
 	s.rwMutex.Lock()

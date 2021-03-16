@@ -146,7 +146,7 @@ func (s *server) handleLogout() http.HandlerFunc {
 		c.Path = "/"
 		c.Value = ""
 		http.SetCookie(w, c)
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/login/", http.StatusFound)
 	}
 }
 

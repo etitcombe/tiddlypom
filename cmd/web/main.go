@@ -64,7 +64,7 @@ func main() {
 	idleConnsClosed := make(chan struct{})
 	go func() {
 		sigint := make(chan os.Signal, 1)
-		signal.Notify(sigint, os.Interrupt, os.Kill, syscall.SIGINT, syscall.SIGTERM)
+		signal.Notify(sigint, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 		s := <-sigint
 
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)

@@ -1,6 +1,6 @@
 module github.com/etitcombe/tiddlypom
 
-go 1.15
+go 1.16
 
 // replace github.com/etitcombe/logifymw => /home/etitcombe/dev/logifymw
 

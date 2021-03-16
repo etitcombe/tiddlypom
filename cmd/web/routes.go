@@ -45,6 +45,8 @@ func addFileHandler(mux *http.ServeMux, file string) {
 
 func (s *server) authenticate(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s.infoLog.Println("authenticate")
+
 		c, err := r.Cookie(rememberCookieName)
 		if err != nil {
 			// When the cookie doesn't exist the err will be "http: named cookie not present"
@@ -99,9 +101,10 @@ func (s *server) recoverPanicMw(next http.Handler) http.Handler {
 
 func (s *server) requireAuthentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s.infoLog.Println("requireAuthentication")
+
 		if !s.isAdmin(r) {
 			http.Redirect(w, r, "/login/", http.StatusFound)
-			// s.clientError(w, http.StatusUnauthorized, "Nope. You're not authorized.")
 			return
 		}
 		next.ServeHTTP(w, r)
